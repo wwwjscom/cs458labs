@@ -1,0 +1,31 @@
+###########################################
+#		Jason Soo                 # 	
+#           CS458 - Fall 2008 		  # 
+#                PA 1                     #
+###########################################
+
+---------------------------------------------
+I. RUNNING THE PROGRAM
+
+There is no compiling needed.
+
+To run the program, assure that it is globaly
+executable.  Thereafter, change directories
+into the code directory.  Then enter the 
+following
+$ ./gcd A B
+where A and B represent the two integers you
+wish to examine.
+
+---------------------------------------------
+II.  SOURCE CODE
+
+The source code is also contained within the
+gcd file.  Use any basic editor to view it.
+
+---------------------------------------------
+III. DOCUMENTATION
+
+The required documentation resides in the
+docs file.  The .pdf files are the visual 
+copies. The .tex files are the source code.
