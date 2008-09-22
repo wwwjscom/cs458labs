@@ -6,7 +6,7 @@ class GCD
 		if b == 0
 			puts a
 		else
-			exec(b, a % b)
+			gcd(b, a % b)
 		end
 	end
 end
