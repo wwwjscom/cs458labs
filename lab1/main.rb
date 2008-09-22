@@ -1,2 +1,18 @@
 #!/usr/bin/env ruby -w
-print "Arg1: #{ARGV[0]} and Arg2: #{ARGV[1]}\n"
+
+class GCD
+
+	def gcd(a, b)
+		if b == 0
+			puts a
+		else
+			exec(b, a % b)
+		end
+	end
+end
+
+a = ARGV[0].to_i
+b = ARGV[1].to_i
+
+gcd = GCD.new
+gcd.gcd(a, b)
