@@ -169,6 +169,5 @@ class Integer
   end
 end
 
-
-p input.prime?
+#p input.prime?
 #p input.is_prime?
