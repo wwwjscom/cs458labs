@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby -w
+
 load "myLib.rb"
 
 size = ARGV[0].to_i

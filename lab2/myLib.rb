@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby -w
 
-input = ARGV[0].to_i
-
 class Integer
 
     def bytesize
@@ -61,6 +59,3 @@ module ModMath
    end
 
 end
-
-
-p input.prime?
