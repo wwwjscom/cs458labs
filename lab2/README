@@ -1,0 +1,40 @@
+###########################################
+#		Jason Soo                 # 	
+#           CS458 - Fall 2008 		  # 
+#                PA 2                     #
+###########################################
+
+---------------------------------------------
+I. RUNNING THE PROGRAM
+
+There is no compiling needed.
+
+To run the program, assure that it is globally
+executable.  Thereafter, change directories
+into the code directory.  Then enter the 
+following
+
+$ ./primecheck A
+
+where A is an integer you would like to check
+to verify whether or not it is a prime number.
+
+Or to generate a prime number:
+
+$ ./gen A
+
+where A is an integer representing the number
+of bits you'd like the prime number to be.
+
+---------------------------------------------
+II.  SOURCE CODE
+
+The source code is also contained within the
+gcd file.  Use any basic editor to view it.
+
+---------------------------------------------
+III. DOCUMENTATION
+
+The required documentation resides in the
+docs file.  The .pdf files are the visual 
+copies. The .tex files are the source code.
