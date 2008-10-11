@@ -59,3 +59,15 @@ module ModMath
    end
 
 end
+
+class GCD
+
+	def gcd(a, b)
+		if b == 0
+			#puts a
+			return a
+		else
+			gcd(b, a % b)
+		end
+	end
+end
