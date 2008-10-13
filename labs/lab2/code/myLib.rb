@@ -71,3 +71,64 @@ class GCD
 		end
 	end
 end
+
+# Calculate ((b**p) % m) assuming that b and m are large integers.
+def Math.power_modulo(b, p, m)
+	if p == 1
+		b % m
+	elsif (p & 0x1) == 0 # p.even?
+		t = power_modulo(b, p >> 1, m)
+		(t * t) % m
+	else
+		(b * power_modulo(b, p-1, m)) % m
+	end
+end
+
+class Jacobian
+
+	def jacobian(r, p)
+		gcd = GCD.new
+		j = Jacobian.new
+
+		# Test 1
+		if(gcd.gcd(r, p) == 1)
+			# Test 2
+			# Compute LHS of equation
+			puts "here"
+			lhs = j.jacobianLHS(r, p)
+			rhs = j.jacobianRHS(r, p)
+			puts j.isCongruent(lhs, rhs, p)
+		end
+	end
+
+	def i?
+		return (self =~ /^-?\d+$/) != nil
+	end
+
+
+	def isCongruent(b, c, m)
+		j = Jacobian.new	
+		#return ((b-c)/m).i?
+		x = ((b-c)/m)
+		return (x =~ /^-?\d+$/) != nil
+		#return x.self.i?
+	end
+
+	def jacobianRHS(r, p)
+		#return r ** ((p-1)/2) % p
+		return r ** ((p-1)/2)
+	end
+
+	def jacobianLHS(r, p)
+		if(r == 1)
+			puts "here"
+			return 1
+		elsif ((r % 2) == 0)
+			puts "here"
+			return jacobianLHS((r/2), p) * (-1)**((p**2 -1)/8)
+		elsif ((r % 2) == 1 && r != 1)
+			puts "here"
+			return jacobianLHS((p % r), r) * (-1)**((r-1)*((p-1)/4))
+		end
+	end
+end
