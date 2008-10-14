@@ -18,13 +18,15 @@ def echo_server(n)
 
 		while str = csock.gets
 			cyphertext = str.to_i
-			puts "[SERVER] Received: #{cyphertext}\n"
+			puts "[SERVER]\t Message received from client...\n\n"
+			puts "[SERVER]\t Received: \t\t\t#{cyphertext}\n"
 
 			plaintext = e.decrypt(10142701089716483, 6085620532976717, cyphertext)
-			puts "[SERVER] Plaintext: #{plaintext}\n"
+			puts "[SERVER]\t Plaintext: \t\t\t#{plaintext}\n"
 
 			cyphertext = e.encrypt(10142789312725007, 5, plaintext)
-			puts "[SERVER] Cyphertext: #{cyphertext}\n"
+			puts "[SERVER]\t Cyphertext: \t\t\t#{cyphertext}\n"
+			puts "\n[SERVER]\t Sending back to client...\n\n"
 
 			n += csock.write(cyphertext.to_s + "\n")
 		end
@@ -41,22 +43,23 @@ end
 def echo_client(n, port = 8081)
 	sock = TCPsocket.open('127.0.0.1', port)
 
-	puts "[CLIENT] Plaintext: #{DATA}\n"
+	puts "\n\n[CLIENT]\t Plaintext: \t\t\t#{DATA}\n"
 
 	e = Encryption.new
 
 	cyphertext = e.encrypt(10142701089716483, 5, DATA)
-	puts "[CLIENT] Cyphertext: #{cyphertext}\n"
+	puts "[CLIENT]\t Cyphertext: \t\t\t#{cyphertext}\n"
+	puts "\n[CLIENT]\t Sending to server...\n\n"
 
 
 	cyphertext_s = cyphertext.to_s + "\n"
 	n.times do
 		sock.write(cyphertext_s)
 		ans = sock.readline
-		puts "[CLIENT] Cyphertext From Server: #{ans}"
+		puts "[CLIENT]\t Cyphertext From Server: \t#{ans}"
 
 		plaintext = e.decrypt(10142789312725007, 8114231289041741, ans.to_i)
-		puts "[CLIENT] Plaintext From Server: #{plaintext}\n"
+		puts "[CLIENT]\t Plaintext From Server: \t#{plaintext}\n\n"
 
 
 
