@@ -17,17 +17,14 @@ def echo_server(n)
 		n = 0
 
 		while str = csock.gets
-		cyphertext = str.to_i
-		puts "[SERVER] Received: #{cyphertext}\n"
+			cyphertext = str.to_i
+			puts "[SERVER] Received: #{cyphertext}\n"
 
-		#plaintext = e.decrypt(6085620532976717, 10142701089716483, cyphertext)
-		plaintext = e.decrypt(10142701089716483, 6085620532976717, cyphertext)
-		puts "[SERVER] Plaintext: #{plaintext}\n"
+			plaintext = e.decrypt(10142701089716483, 6085620532976717, cyphertext)
+			puts "[SERVER] Plaintext: #{plaintext}\n"
 
-		cyphertext_new = e.encrypt(10142789312725007, 5, plaintext)
-		puts "[SERVER] Cyphertext: #{cyphertext_new}\n"
-
-
+			cyphertext_new = e.encrypt(10142789312725007, 5, plaintext)
+			puts "[SERVER] Cyphertext: #{cyphertext_new}\n"
 
 			n += csock.write(str)
 		end
@@ -40,7 +37,6 @@ def echo_server(n)
 		return
 	end
 end
-DATA = 34923459234099
 
 def echo_client(n, port = 8081)
 	sock = TCPsocket.open('127.0.0.1', port)
@@ -57,10 +53,10 @@ def echo_client(n, port = 8081)
 	n.times do
 		sock.write(cyphertext_s)
 		ans = sock.readline
-	puts "[CLIENT] Cyphertext From Server: #{ans}\n"
+		puts "[CLIENT] Cyphertext From Server: #{ans}\n"
 
-	plaintext = e.decrypt(10142789312725007, 8114231289041741, ans.to_i)
-	puts "[CLIENT] Plaintext From Server: #{plaintext}\n"
+		plaintext = e.decrypt(10142789312725007, 8114231289041741, ans.to_i)
+		puts "[CLIENT] Plaintext From Server: #{plaintext}\n"
 
 
 
@@ -70,6 +66,5 @@ def echo_client(n, port = 8081)
 
 end
 
-#echo_server()
-echo_server(Integer(ARGV.shift || 1))
-#respond_server(Integer(ARGV.shift || 1))
+DATA = ARGV[0]
+echo_server(1)
