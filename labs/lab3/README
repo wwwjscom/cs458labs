@@ -1,0 +1,34 @@
+###########################################
+#		Jason Soo                 # 	
+#           CS458 - Fall 2008 		  # 
+#                PA 3                     #
+###########################################
+
+---------------------------------------------
+I. RUNNING THE PROGRAM
+
+There is no compiling needed.
+
+To run the program, assure that it is globally
+executable.  Thereafter, change directories
+into the code directory.  Then enter the 
+following
+
+$ ./main.rb A
+
+where A is the plaintext message that the
+client wishes to send to the server.
+
+
+---------------------------------------------
+II.  SOURCE CODE
+
+The source code is also contained within the
+main.rb file.  Use any basic editor to view it.
+
+---------------------------------------------
+III. DOCUMENTATION
+
+The required documentation resides in the
+docs file.  The .pdf files are the visual 
+copies. The .tex files are the source code.
