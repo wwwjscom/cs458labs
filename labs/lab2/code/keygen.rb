@@ -14,7 +14,6 @@ gcd = GCD.new
 e = 2
 
 while gcd.gcd(e, totient) != 1
-	puts "e"*20
 	e += 1
 end
 
