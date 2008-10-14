@@ -23,10 +23,10 @@ def echo_server(n)
 			plaintext = e.decrypt(10142701089716483, 6085620532976717, cyphertext)
 			puts "[SERVER] Plaintext: #{plaintext}\n"
 
-			cyphertext_new = e.encrypt(10142789312725007, 5, plaintext)
-			puts "[SERVER] Cyphertext: #{cyphertext_new}\n"
+			cyphertext = e.encrypt(10142789312725007, 5, plaintext)
+			puts "[SERVER] Cyphertext: #{cyphertext}\n"
 
-			n += csock.write(str)
+			n += csock.write(cyphertext.to_s + "\n")
 		end
 
 		Process.wait
@@ -53,7 +53,7 @@ def echo_client(n, port = 8081)
 	n.times do
 		sock.write(cyphertext_s)
 		ans = sock.readline
-		puts "[CLIENT] Cyphertext From Server: #{ans}\n"
+		puts "[CLIENT] Cyphertext From Server: #{ans}"
 
 		plaintext = e.decrypt(10142789312725007, 8114231289041741, ans.to_i)
 		puts "[CLIENT] Plaintext From Server: #{plaintext}\n"
