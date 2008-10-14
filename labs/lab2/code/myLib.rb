@@ -73,20 +73,42 @@ class GCD
 end
 
 # Calculate ((b**p) % m) assuming that b and m are large integers.
-def Math.power_modulo(b, p, m)
+def Math.powmod(b, p, m)
 	if p == 1
 		b % m
 	elsif (p & 0x1) == 0 # p.even?
-		t = power_modulo(b, p >> 1, m)
+		t = powmod(b, p >> 1, m)
 		(t * t) % m
 	else
-		(b * power_modulo(b, p-1, m)) % m
+		(b * powmod(b, p-1, m)) % m
 	end
 end
 
 class Jacobian
 
+	def findRepeat(p)
+		j = Jacobian.new
+
+		for i in (1..25)
+			if(j.find(p) == false)
+				return false
+			end
+		end
+
+		return true
+	end
+
+
+	def find(p)
+		r = rand(p-1)
+		r = r + 1
+
+		j = Jacobian.new
+		return j.jacobian(r, p)
+	end
+
 	def jacobian(r, p)
+
 		gcd = GCD.new
 		j = Jacobian.new
 
@@ -94,41 +116,86 @@ class Jacobian
 		if(gcd.gcd(r, p) == 1)
 			# Test 2
 			# Compute LHS of equation
-			puts "here"
 			lhs = j.jacobianLHS(r, p)
 			rhs = j.jacobianRHS(r, p)
-			puts j.isCongruent(lhs, rhs, p)
+			return j.isCongruent(lhs, rhs, p)
+		else
+			return false
 		end
-	end
 
-	def i?
-		return (self =~ /^-?\d+$/) != nil
 	end
-
 
 	def isCongruent(b, c, m)
-		j = Jacobian.new	
-		#return ((b-c)/m).i?
 		x = ((b-c)/m)
-		return (x =~ /^-?\d+$/) != nil
-		#return x.self.i?
+		return x.is_a?(Integer)
 	end
 
 	def jacobianRHS(r, p)
-		#return r ** ((p-1)/2) % p
-		return r ** ((p-1)/2)
+		return r ** ((p-1)/2) % p
+		#return r ** ((p-1)/2)
 	end
 
 	def jacobianLHS(r, p)
 		if(r == 1)
-			puts "here"
 			return 1
 		elsif ((r % 2) == 0)
-			puts "here"
 			return jacobianLHS((r/2), p) * (-1)**((p**2 -1)/8)
 		elsif ((r % 2) == 1 && r != 1)
-			puts "here"
 			return jacobianLHS((p % r), r) * (-1)**((r-1)*((p-1)/4))
+		end
+	end
+end
+
+def modinverse(a, z)
+	n = a
+	m = z
+
+	u1 = 1
+	u2 = 0
+	u3 = a
+
+	v1 = 0
+	v2 = 1
+	v3 = z
+
+	while v3 != 0
+		qq = (u3/v3).floor
+		t1 = u1 - qq * v1
+		t2 = u2 - qq * v2
+		t3 = u3 - qq * v3
+		u1 = v1
+		u2 = v2
+		u3 = v3
+		v1 = t1
+		v2 = t2
+		v3 = t3
+		z = 1
+	end
+
+	uu = u1
+	vv = u2
+
+	if vv < 0
+		i = vv + m
+	else
+		i = vv
+	end
+
+	return i
+end
+
+# extended Euclid algorithm
+def findPrivateKey(b,m,_recursion_depth=0)
+	if b % m == 0
+		temp = [0,1]
+		return temp
+	else
+		temp = findPrivateKey(m, b % m, _recursion_depth+1)
+		temp2 = [temp[1], temp[0]-temp[1] * ((b/m).to_i)]
+		if _recursion_depth == 0
+			return temp2[0] % m
+		else
+			return temp2
 		end
 	end
 end

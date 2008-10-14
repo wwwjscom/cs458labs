@@ -24,16 +24,7 @@ end
 # ints from 1 to totient. Test
 # d * e = 1 * mod(totient), that
 # is, ((d * e) -1) % totient == 0.
-
-d = 1
-#d = (totient + 1) / 2
-#while ((d * e) -1 ) % totient != 0
-while ((d * e) -1 ) % totient != 0
-	puts d
-	d += 1
-	#d += 2
-	#d -= 2
-end
+d = findPrivateKey(e, totient)
 
 puts "Public key: (#{n}, #{e})"
 puts "Private key: (#{n}, #{d})"
