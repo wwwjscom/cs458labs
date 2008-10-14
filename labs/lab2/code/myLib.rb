@@ -146,44 +146,6 @@ class Jacobian
 	end
 end
 
-def modinverse(a, z)
-	n = a
-	m = z
-
-	u1 = 1
-	u2 = 0
-	u3 = a
-
-	v1 = 0
-	v2 = 1
-	v3 = z
-
-	while v3 != 0
-		qq = (u3/v3).floor
-		t1 = u1 - qq * v1
-		t2 = u2 - qq * v2
-		t3 = u3 - qq * v3
-		u1 = v1
-		u2 = v2
-		u3 = v3
-		v1 = t1
-		v2 = t2
-		v3 = t3
-		z = 1
-	end
-
-	uu = u1
-	vv = u2
-
-	if vv < 0
-		i = vv + m
-	else
-		i = vv
-	end
-
-	return i
-end
-
 # extended Euclid algorithm
 def findPrivateKey(b,m,_recursion_depth=0)
 	if b % m == 0

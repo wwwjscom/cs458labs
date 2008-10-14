@@ -26,6 +26,28 @@ $ ./gen A
 where A is an integer representing the number
 of bits you'd like the prime number to be.
 
+Or to generate a public and private key pair:
+
+$ ./keygen.rb A B
+
+where A and B are two different prime numbers.
+
+Or to encrypt a message
+
+$ ./encrypt.rb N E M
+
+where M is the message to be encrypted. N is
+the base of the private key and E is the
+exponent of the private key.
+
+Or to decrypt a message
+
+$ ./decrypt.rb N D M
+
+where M is the message to be decrypted. N is
+the base of the private key and D is the
+exponent of the private key.
+
 ---------------------------------------------
 II.  SOURCE CODE
 
