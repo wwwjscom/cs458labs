@@ -68,6 +68,17 @@ def writeFile
 
 end
 
+def deleteRules
+	toDelete = gets
+
+	# Deletes all rules given seperated
+	# by spaces
+	toDelete.split(" ").each do |rule|
+		# Delete the given rule
+		@@rulesArray.delete_at((rule.to_i)-1)
+	end
+end
+
 while true
 
 	puts "1. Add Rule\n"
@@ -84,6 +95,7 @@ while true
 
 	case command
 		when 1 then addRule
+		when 2 then deleteRules
 		when 3 then printRules
 		when 6 then writeFile
 	end
