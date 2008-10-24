@@ -45,8 +45,13 @@ def addRule
 	@@rulesArray.push(h)
 end
 
+# Loop through the rules Array and print
 def printRules
 	
+	i = 1
+	@@rulesArray.each do |rule|
+		puts "#{i}-#{rule.fetch('src_ip')}/#{rule.fetch('src_netmask')}:#{rule.fetch('src_port')} #{rule.fetch('dest_ip')}/#{rule.fetch('dest_netmask')}:#{rule.fetch('dest_port')} #{rule.fetch('protocol')} #{rule.fetch('action')}"
+	end
 end
 
 while true
@@ -65,6 +70,7 @@ while true
 
 	case command
 		when 1 then addRule
-		when 2 then puts @@rulesArray.to_s
+		#when 2 then puts @@rulesArray.to_s
+		when 2 then printRules
 	end
 end
