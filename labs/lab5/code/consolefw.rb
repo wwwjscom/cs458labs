@@ -1,6 +1,7 @@
 #! /usr/bin/env ruby -w
 
 @@rulesArray = Array.new{}
+@@outputFile = File.new("./rules", "w")
 
 def addRule
 
@@ -48,10 +49,23 @@ end
 # Loop through the rules Array and print
 def printRules
 	
-	i = 1
+	@i = 1
 	@@rulesArray.each do |rule|
-		puts "#{i}-#{rule.fetch('src_ip')}/#{rule.fetch('src_netmask')}:#{rule.fetch('src_port')} #{rule.fetch('dest_ip')}/#{rule.fetch('dest_netmask')}:#{rule.fetch('dest_port')} #{rule.fetch('protocol')} #{rule.fetch('action')}"
+		puts "
+			#{@i}-#{rule.fetch('src_ip')}/#{rule.fetch('src_netmask')}:#{rule.fetch('src_port')} #{rule.fetch('dest_ip')}/#{rule.fetch('dest_netmask')}:#{rule.fetch('dest_port')} #{rule.fetch('protocol')} #{rule.fetch('action')}"
+		@i += 1
 	end
+end
+
+# Write the rules array to file, correctly formatted.
+def writeFile
+
+	@i = 1
+	@@rulesArray.each do |rule|
+		@@outputFile.puts "#{@i}-#{rule.fetch('src_ip')}/#{rule.fetch('src_netmask')}:#{rule.fetch('src_port')} #{rule.fetch('dest_ip')}/#{rule.fetch('dest_netmask')}:#{rule.fetch('dest_port')} #{rule.fetch('protocol')} #{rule.fetch('action')}"
+		@i += 1
+	end
+
 end
 
 while true
@@ -61,7 +75,7 @@ while true
 	puts "3. Print Rules\n"
 	puts "4. Start Firewall\n"
 	puts "5. Save Firewall\n"
-	puts "6. Save Ruesl To File\n"
+	puts "6. Save Rules To File\n"
 	puts "7. Load Rules From File\n"
 	puts "8. Quit\n"
 
@@ -70,7 +84,7 @@ while true
 
 	case command
 		when 1 then addRule
-		#when 2 then puts @@rulesArray.to_s
-		when 2 then printRules
+		when 3 then printRules
+		when 6 then writeFile
 	end
 end
