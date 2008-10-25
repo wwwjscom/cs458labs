@@ -1,7 +1,6 @@
 #! /usr/bin/env ruby -w
 
 @@rulesArray = Array.new{}
-@@outputFile = File.new("./rules", "w")
 
 def addRule
 
@@ -51,8 +50,7 @@ def printRules
 	
 	@i = 1
 	@@rulesArray.each do |rule|
-		puts "
-			#{@i}-#{rule.fetch('src_ip')}/#{rule.fetch('src_netmask')}:#{rule.fetch('src_port')} #{rule.fetch('dest_ip')}/#{rule.fetch('dest_netmask')}:#{rule.fetch('dest_port')} #{rule.fetch('protocol')} #{rule.fetch('action')}"
+		puts "#{@i}-#{rule.fetch('src_ip')}/#{rule.fetch('src_netmask')}:#{rule.fetch('src_port')} #{rule.fetch('dest_ip')}/#{rule.fetch('dest_netmask')}:#{rule.fetch('dest_port')} #{rule.fetch('protocol')} #{rule.fetch('action')}"
 		@i += 1
 	end
 end
@@ -60,12 +58,67 @@ end
 # Write the rules array to file, correctly formatted.
 def writeFile
 
+	outputFile = File.new("./rules", "w")
+
 	@i = 1
 	@@rulesArray.each do |rule|
-		@@outputFile.puts "#{@i}-#{rule.fetch('src_ip')}/#{rule.fetch('src_netmask')}:#{rule.fetch('src_port')} #{rule.fetch('dest_ip')}/#{rule.fetch('dest_netmask')}:#{rule.fetch('dest_port')} #{rule.fetch('protocol')} #{rule.fetch('action')}"
+		outputFile.puts "#{@i}-#{rule.fetch('src_ip')}/#{rule.fetch('src_netmask')}:#{rule.fetch('src_port')} #{rule.fetch('dest_ip')}/#{rule.fetch('dest_netmask')}:#{rule.fetch('dest_port')} #{rule.fetch('protocol')} #{rule.fetch('action')}"
 		@i += 1
 	end
 
+	outputFile.close
+end
+
+def loadRules
+
+	File.open("./rules").each do |line|
+		
+		line 	= line.split("-")
+		i	= line.fetch(0)
+
+		puts line.fetch(1)
+		line	= line.fetch(1).split("/")
+		src_ip	= line.fetch(0)
+
+		puts line.fetch(1)
+		line	= line.fetch(1).split(":")
+		src_netmask = line.fetch(0)
+
+		puts line.fetch(1)
+		line	= line.fetch(1).split(" ")
+		src_port = line.fetch(0)
+
+		puts line.fetch(1)
+		line	= line.fetch(1).split("/")
+		dest_ip	= line.fetch(0)
+
+		puts line.fetch(1)
+		line	= line.fetch(1).split(":")
+		dest_netmask = line.fetch(0)
+
+		line	= line.fetch(1).split(" ")
+		dest_port = line.fetch(0)
+
+		#line	= line.fetch(1).split(" ")
+		protocol = line.fetch(1)
+
+		action	= line.fetch(2)
+
+		h = Hash.new{}
+		h = 
+			{
+				"src_ip" => src_ip, 
+				"src_netmask" => src_netmask,
+				"src_port" => src_port,
+				"dest_ip" => dest_ip,
+				"dest_netmask" => dest_netmask,
+				"dest_port" => dest_port,
+				"protocol" => protocol,
+				"action" => action
+			}
+
+		@@rulesArray.push(h)
+	end
 end
 
 def deleteRules
@@ -98,5 +151,6 @@ while true
 		when 2 then deleteRules
 		when 3 then printRules
 		when 6 then writeFile
+		when 7 then loadRules
 	end
 end
