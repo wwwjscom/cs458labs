@@ -73,36 +73,48 @@ def loadRules
 
 	File.open("./rules").each do |line|
 		
-		line 	= line.split("-")
-		i	= line.fetch(0)
+		ip = line.slice!(/.+-/)[0..-2]
+		puts "IP: #{ip}"
+		puts "Remainig: #{line}"
 
-		puts line.fetch(1)
-		line	= line.fetch(1).split("/")
-		src_ip	= line.fetch(0)
 
-		puts line.fetch(1)
-		line	= line.fetch(1).split(":")
-		src_netmask = line.fetch(0)
+		src_ip	= line.slice!(/\w*\//)[0..-2]
+		puts "sip #{src_ip}"
+		#line	= line.fetch(1).split("/")
+		#src_ip	= line.fetch(0)
 
-		puts line.fetch(1)
-		line	= line.fetch(1).split(" ")
-		src_port = line.fetch(0)
+		src_netmask = line.slice!(/\w+:/)[0..-2]
+		puts "smask #{src_netmask}"
+		#puts line.fetch(1)
+		#line	= line.fetch(1).split(":")
+		#src_netmask = line.fetch(0)
 
-		puts line.fetch(1)
-		line	= line.fetch(1).split("/")
-		dest_ip	= line.fetch(0)
-
-		puts line.fetch(1)
-		line	= line.fetch(1).split(":")
-		dest_netmask = line.fetch(0)
-
-		line	= line.fetch(1).split(" ")
-		dest_port = line.fetch(0)
-
+		puts line
+		src_port = line.slice!(/\w+ /)[0..-2]
+		#puts line.fetch(1)
 		#line	= line.fetch(1).split(" ")
-		protocol = line.fetch(1)
+		#src_port = line.fetch(0)
 
-		action	= line.fetch(2)
+		dest_ip = line.slice!(/\w+\//)[0..-2]
+		#puts line.fetch(1)
+		#line	= line.fetch(1).split("/")
+		#dest_ip	= line.fetch(0)
+
+		dest_netmask = line.slice!(/\w+:/)[0..-2]
+		#puts line.fetch(1)
+		#line	= line.fetch(1).split(":")
+		#dest_netmask = line.fetch(0)
+
+		dest_port = line.slice!(/\w+ /)[0..-2]
+		#line	= line.fetch(1).split(" ")
+		#dest_port = line.fetch(0)
+
+		protocol = line.slice!(/\w+ /)[0..-2]
+		#line	= line.fetch(1).split(" ")
+		#protocol = line.fetch(1)
+
+		action = line
+		#action	= line.fetch(2)
 
 		h = Hash.new{}
 		h = 
@@ -117,6 +129,9 @@ def loadRules
 				"action" => action
 			}
 
+		h.each do |entry|
+			puts entry
+		end
 		@@rulesArray.push(h)
 	end
 end
