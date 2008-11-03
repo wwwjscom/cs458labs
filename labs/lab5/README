@@ -1,0 +1,32 @@
+###########################################
+#		Jason Soo                 # 	
+#           CS458 - Fall 2008 		  # 
+#                PA 5                     #
+###########################################
+
+---------------------------------------------
+I. RUNNING THE PROGRAM
+
+There is no compiling needed.
+
+** YOU MUST BE ROOT WHEN RUNNING THE CODE **
+
+To run the program, assure that it is globally
+executable.  Thereafter, change directories
+into the code directory.  Then enter the 
+following
+
+$ ./consolefw.rb
+
+---------------------------------------------
+II.  SOURCE CODE
+
+The source code is also contained within the
+consolefw.rb file.  Use any basic editor to view it.
+
+---------------------------------------------
+III. DOCUMENTATION
+
+The required documentation resides in the
+docs file.  The .pdf files are the visual 
+copies. The .tex files are the source code.
