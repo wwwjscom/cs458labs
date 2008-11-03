@@ -1,0 +1,2 @@
+1-ip/mask:port dip/dmask:dport tcp allow
+2-ip/mask:port dip/dmask:dport tcp allow
