@@ -8,6 +8,9 @@ end
 # Probably needs to be threaded
 # and have its output redirected
 def dump
+	@@thread = Thread.new do
+		system("tcpdump -n -i en1")
+	end
 end
 
 def setInterface i
@@ -20,5 +23,27 @@ end
 def output
 end
 
-def main
+def laters
+	Thread.kill(@@thread)
 end
+
+
+def main
+	@run = true
+	setInterface "en1"
+
+	dump
+
+	command = gets.to_i
+
+	while @run
+		case command
+			when 0 then 
+				laters
+				@run = false
+		end
+	end
+
+end
+# kick off program
+main
