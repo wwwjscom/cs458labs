@@ -16,7 +16,12 @@ executable.  Thereafter, change directories
 into the code directory.  Then enter the 
 following
 
-$ ./consolefw.rb
+$ ./analyzetraffic.rb query-term
+$ ./dumptraffic.rb
+$ ./readtraffic.rb
+$ ./sniffall.rb
+$ ./sniffudp.rb
+$ ./snifftcp.rb
 
 ---------------------------------------------
 II.  SOURCE CODE

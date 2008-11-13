@@ -5,5 +5,9 @@ require 'pcaplet'
 network = Pcaplet.new('-n -i en1')
 
 network.each_packet do |pkt|
-	puts "#{pkt.ip_src}:#{pkt.sport} #{pkt.ip_dst}:#{pkt.dport}"
+	begin
+		puts "#{pkt.ip_src}:#{pkt.sport} #{pkt.ip_dst}:#{pkt.dport}"
+	rescue
+		nil
+	end
 end
