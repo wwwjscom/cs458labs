@@ -6,10 +6,13 @@ require 'pcaplet'
 
 tcp_filter = Pcap::Filter.new('tcp', @@network.capture)
 
-os_ping = 0
-os_pinger = 0
+@@os_ping = 0
+@@os_pinger = 0
 os_ping_time = 0
 
+port_scanner = 0
+@@d_port = 0
+port_scan_count = 0
 
 @run = true
 @@rulesArray = Array.new
@@ -269,30 +272,72 @@ end
 
 def monitor
 	@@network.each_packet do |pkt|
-		#puts "#{pkt.ip_src}:#{pkt.sport} #{pkt.ip_dst}:#{pkt.dport}" if tcp_filter =~ pkt
 
-		begin
+		#begin
+			###			###
+			### Detect NOP Payloads ###
+			###			###
 
-			if (pkt.tcp_fin? or pkt.tcp_ack? or pkt.tcp_syn?) and (pkt.ip_src == os_pinger) then
-				os_pinger = pkt.ip_src
-				os_ping += 1
-			else
-				os_ping_time = Time.new
-				os_ping = 0
-				os_pinger = pkt.ip_src
+			if pkt.tcp_data =~ "NOP"
+				# Flag for NOP payload
 			end
 
-			if os_ping >= 5 and (Time.new - os_ping_time) < 20  then
+
+			###			    ###
+			### Check for port scanning ###
+			###			    ###
+			
+			if (pkt.dport == (@@d_port + 1)) and (pkt.ip_src == port_scanner) then
+				# They have searched for the next sequential port
+				@@d_port += 1
+				port_scan_count += 1
+
+				if port_scan_count >= 5 then
+					# Block them
+
+					# reset variables
+					port_scanner = 0
+					@@d_port = 0
+					port_scan_count = 0
+				end
+			else
+				# Brand new scan
+				port_scanner = pkt.ip_src
+				@@d_port = pkt.dport
+				port_scan_count = 1
+			end
+
+			puts "Port Scanner: #{port_scanner}"
+			puts "Dest Port: #{@@d_port}"
+			puts "Port Scan Count: #{port_scan_count}"
+
+
+			###			 ###
+			### Check for OS Pinging ###
+			###			 ###
+			
+			if (pkt.tcp_fin? or pkt.tcp_ack? or pkt.tcp_syn?) and (pkt.ip_src == @@os_pinger) then
+				@@os_pinger = pkt.ip_src
+				@@os_ping += 1
+			else
+				os_ping_time = Time.new
+				@@os_ping = 0
+				@@os_pinger = pkt.ip_src
+			end
+
+			if @@os_ping >= 5 and (Time.new - os_ping_time) < 20  then
 				# block IP for OS pinging
 			end
 
+			# Debug outputs
 			puts "OS Ping Time: #{os_ping_time}"
-			puts "OS Ping: #{os_ping}"
-			puts "OS Pinger: #{os_pinger}"
+			puts "OS Ping: #{@@os_ping}"
+			puts "OS Pinger: #{@@os_pinger}"
 
-		rescue
-			nil
-		end
+
+		#rescue
+		#	nil
+		#end
 	end
 end
 
