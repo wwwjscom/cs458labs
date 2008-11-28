@@ -1,8 +1,9 @@
 #! /usr/bin/env ruby -w
 
 require 'pcaplet'
+require 'thread'
 
-@@network = Pcaplet.new('-n -i en1')
+@@network = Pcaplet.new('-n -i en1 -s 1500')
 
 tcp_filter = Pcap::Filter.new('tcp', @@network.capture)
 
@@ -167,6 +168,17 @@ def writeFile
 	puts "Rules Saved!"
 end
 
+def writeLog ip, reason
+
+	outputFile = File.new("./ids.txt", "a")
+
+	t = Time.new
+
+	outputFile.puts "#{t.strftime("%Y%m%d-%H:%M.%S")} #{ip} #{reason}"
+
+	outputFile.close
+end
+
 def loadRules
 
 	@i = 1
@@ -273,12 +285,13 @@ end
 def monitor
 	@@network.each_packet do |pkt|
 
-		#begin
+		begin
 			###			###
 			### Detect NOP Payloads ###
 			###			###
 
-			if pkt.tcp_data =~ "NOP"
+			if pkt.tcp_data.to_s =~ /NOP/
+				writeLog(pkt.ip_src, "Buffer Overflow")
 				# Flag for NOP payload
 			end
 
@@ -294,6 +307,7 @@ def monitor
 
 				if port_scan_count >= 5 then
 					# Block them
+					writeLog(pkt.ip_src, "Port Scan")
 
 					# reset variables
 					port_scanner = 0
@@ -326,6 +340,10 @@ def monitor
 			end
 
 			if @@os_ping >= 5 and (Time.new - os_ping_time) < 20  then
+				writeLog(pkt.ip_src, "OS Fingerprinting")
+				
+				@@os_ping = 0
+				@@os_pinger = 0
 				# block IP for OS pinging
 			end
 
@@ -335,37 +353,51 @@ def monitor
 			puts "OS Pinger: #{@@os_pinger}"
 
 
-		#rescue
-		#	nil
-		#end
+		rescue
+			nil
+		end
 	end
+end
+
+def verbose time
+	(time.to_i).seconds
 end
 
 while @run
 
-	puts "1. Add Rule\n"
-	puts "2. Delete Rule\n"
-	puts "3. Print Rules\n"
-	puts "4. Start Firewall\n"
-	puts "5. Stop Firewall\n"
-	puts "6. Save Rules To File\n"
-	puts "7. Load Rules From File\n"
-	puts "8. Quit\n"
+	puts "1. Start IDS"
+	puts "2. Stop IDS"
+	puts "3. View Current Traffic"
+	puts "4. View Block List"
+	puts "5. View Current Firewall Rules"
+	puts "6. Unlock User"
+	puts "7. Quit"
+
+	#puts "1. Add Rule\n"
+	#puts "2. Delete Rule\n"
+	#puts "3. Print Rules\n"
+	#puts "4. Start Firewall\n"
+	#puts "5. Stop Firewall\n"
+	#puts "6. Save Rules To File\n"
+	#puts "7. Load Rules From File\n"
+	#puts "8. Quit\n"
 
 	# What should we do
 	command = gets.to_i
 
 	case command
-		when 1 then addRule
-		when 2 then deleteRules
-		when 3 then printRules
-		when 4 then startFirewall
-		when 5 then stopFirewall
-		when 6 then writeFile
-		when 7 then loadRules
+		#when 1 then addRule
+		#when 2 then deleteRules
+		#when 3 then printRules
+		#when 4 then startFirewall
+		#when 5 then stopFirewall
+		#when 6 then writeFile
+		#when 7 then loadRules
+		when 1 then @@t = Thread.new(monitor)
+		when 2 then @@t.stop
+		when 3 then verbose(10)
 		when 8 then
 			puts "Bye now!" 
 			@run = false 
-		when 9 then monitor
 	end
 end
