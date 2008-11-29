@@ -3,6 +3,7 @@
 require 'pcaplet'
 require 'thread'
 
+
 @@network = Pcaplet.new('-n -i en1')
 
 tcp_filter = Pcap::Filter.new('tcp', @@network.capture)
@@ -59,11 +60,16 @@ def addRule
 		}
 
 
-	if validRule?(h) then
+	add_rule_to_array(h)
+
+	#puts validRule?(h) ? "Rule added!" : "Error"
+end
+
+def add_rule_to_array rule_hash
+	if validRule?(rule_hash) then
 		@@rulesArray.push(h)
 		puts "Rule added!"
 	end
-	#puts validRule?(h) ? "Rule added!" : "Error"
 end
 
 def validRule? rule
@@ -177,6 +183,16 @@ def writeLog ip, reason
 	outputFile.puts "#{t.strftime("%Y%m%d-%H:%M.%S")} #{ip} #{reason}"
 
 	outputFile.close
+end
+
+def clearLog
+
+	outputFile = File.new("./ids.txt", "w")
+
+	outputFile.puts ""
+
+	outputFile.close
+
 end
 
 def loadRules
@@ -293,6 +309,19 @@ def monitor
 			if pkt.tcp_data.to_s =~ /NOP/
 				writeLog(pkt.ip_src, "Buffer Overflow")
 				# Flag for NOP payload
+				h = Hash.new{}
+				h = 
+					{
+					"src_ip" => pkt.ip_src, 
+					"src_netmask" => "255.255.255.0",
+					"src_port" => pkt.sport,
+					"dest_ip" => pkt.dst,
+					"dest_netmask" => "255.255.255.0",
+					"dest_port" => pkt.dport,
+					"protocol" => "0",
+					"action" => "1"
+					}
+				add_rule_to_array(h)
 			end
 
 
@@ -385,18 +414,25 @@ def read_IDS
 
 	@i = 1
 
-	File.open("./ids.txt").each do |line|
-		
-		line = line.chop
+	begin
+		File.open("./ids.txt").each do |line|
 
-		line = line[( line.index(' ') + 1 )..-1]
+			line = line.chop
 
-		puts "#{@i}-#{line}"
+			line = line[( line.index(' ') + 1 )..-1]
 
-	
-		@i = @i + 1
+			puts "#{@i}-#{line}"
+
+			@i = @i + 1
+		end
+	rescue
+		puts "No one is blocked at the moment"
 	end
 end
+
+
+# Clear the ids.txt file before we get started
+clearLog
 
 while @run
 
@@ -408,30 +444,15 @@ while @run
 	puts "6. Unlock User"
 	puts "7. Quit"
 
-	#puts "1. Add Rule\n"
-	#puts "2. Delete Rule\n"
-	#puts "3. Print Rules\n"
-	#puts "4. Start Firewall\n"
-	#puts "5. Stop Firewall\n"
-	#puts "6. Save Rules To File\n"
-	#puts "7. Load Rules From File\n"
-	#puts "8. Quit\n"
-
 	# What should we do
 	command = gets.to_i
 
 	case command
-		#when 1 then addRule
-		#when 2 then deleteRules
-		#when 3 then printRules
-		#when 4 then startFirewall
-		#when 5 then stopFirewall
-		#when 6 then writeFile
-		#when 7 then loadRules
 		when 1 then @@t = Thread.new{ monitor }
 		when 2 then Thread.kill(@@t)
 		when 3 then countdown
 		when 4 then read_IDS
+		when 5 then printRules
 		when 7 then
 			puts "Bye now!" 
 			@run = false 
