@@ -1,0 +1,14 @@
+Virgil Bistriceanu
+Jason Soo
+November 28th 2008
+Programming Assignment 7
+
+-------------------------------------
+
+Assignment Status: Mostly Complete
+
+The assignment is almost complete.
+
+I failed to include unblock user.  Everything else appears to be working correctly.
+
+Furthermore, hping2 does not work correctly on macs.  It failed to send the packets to my IDS, instead if ran into a 100\% drop rate.  Thus, I couldn't perform the tests manually.  My IDS did however block user while monitoring.

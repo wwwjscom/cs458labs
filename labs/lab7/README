@@ -16,12 +16,7 @@ executable.  Thereafter, change directories
 into the code directory.  Then enter the 
 following
 
-$ ./analyzetraffic.rb query-term
-$ ./dumptraffic.rb
-$ ./readtraffic.rb
-$ ./sniffall.rb
-$ ./sniffudp.rb
-$ ./snifftcp.rb
+$ ./ids.rb
 
 ---------------------------------------------
 II.  SOURCE CODE
