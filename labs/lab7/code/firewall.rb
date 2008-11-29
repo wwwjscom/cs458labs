@@ -381,6 +381,23 @@ def countdown
 
 end
 
+def read_IDS
+
+	@i = 1
+
+	File.open("./ids.txt").each do |line|
+		
+		line = line.chop
+
+		line = line[( line.index(' ') + 1 )..-1]
+
+		puts "#{@i}-#{line}"
+
+	
+		@i = @i + 1
+	end
+end
+
 while @run
 
 	puts "1. Start IDS"
@@ -414,6 +431,7 @@ while @run
 		when 1 then @@t = Thread.new{ monitor }
 		when 2 then Thread.kill(@@t)
 		when 3 then countdown
+		when 4 then read_IDS
 		when 7 then
 			puts "Bye now!" 
 			@run = false 
