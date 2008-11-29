@@ -3,7 +3,7 @@
 require 'pcaplet'
 require 'thread'
 
-@@network = Pcaplet.new('-n -i en1 -s 1500')
+@@network = Pcaplet.new('-n -i en1')
 
 tcp_filter = Pcap::Filter.new('tcp', @@network.capture)
 
@@ -285,10 +285,6 @@ end
 def monitor
 	@@network.each_packet do |pkt|
 
-		#if gets.to_i == 2 then
-		#	Thread.kill(@@t)
-		#end
-
 		begin
 			###			###
 			### Detect NOP Payloads ###
@@ -363,8 +359,26 @@ def monitor
 	end
 end
 
-def verbose time
-	(time.to_i).seconds
+def verbose
+	@@network.each_packet do |pkt|
+		puts "#{pkt.ip_src}:#{pkt.sport} #{pkt.ip_dst}:#{pkt.dport}"
+	end
+end
+
+def countdown
+	stop_time = Time.new.to_f + 10
+
+	thread = Thread.new{ while true do verbose end }
+
+	while true do
+		if Time.new.to_f < stop_time then
+			nil
+		else
+			Thread.kill(thread)
+			break
+		end
+	end
+
 end
 
 while @run
@@ -399,8 +413,8 @@ while @run
 		#when 7 then loadRules
 		when 1 then @@t = Thread.new{ monitor }
 		when 2 then Thread.kill(@@t)
-		when 3 then verbose(10)
-		when 8 then
+		when 3 then countdown
+		when 7 then
 			puts "Bye now!" 
 			@run = false 
 	end
