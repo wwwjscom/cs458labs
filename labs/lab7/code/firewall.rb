@@ -285,6 +285,10 @@ end
 def monitor
 	@@network.each_packet do |pkt|
 
+		#if gets.to_i == 2 then
+		#	Thread.kill(@@t)
+		#end
+
 		begin
 			###			###
 			### Detect NOP Payloads ###
@@ -393,8 +397,8 @@ while @run
 		#when 5 then stopFirewall
 		#when 6 then writeFile
 		#when 7 then loadRules
-		when 1 then @@t = Thread.new(monitor)
-		when 2 then @@t.stop
+		when 1 then @@t = Thread.new{ monitor }
+		when 2 then Thread.kill(@@t)
 		when 3 then verbose(10)
 		when 8 then
 			puts "Bye now!" 
