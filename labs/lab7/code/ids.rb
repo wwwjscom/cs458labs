@@ -5,7 +5,7 @@ require 'thread'
 
 
 #@@network = Pcaplet.new('-n -i en1')
-@@network = Pcaplet.new('-n -i lo0')
+@@network = Pcaplet.new('-n -i lo0 -s 1500')
 
 tcp_filter = Pcap::Filter.new('tcp', @@network.capture)
 
@@ -333,20 +333,23 @@ def monitor
 			### Check for port scanning ###
 			###			    ###
 			
-			if (pkt.dport == (@@d_port + 1)) and (pkt.ip_src == @@port_scanner) then
+			if (pkt.dport == (@@d_port + 1)) and (pkt.ip_src == @@port_scanner) and pkt.dport != 0 then
 			#if ((pkt.dport == (@@d_port + 1)) or (pkt.dport == (@@dd_port + 1))) and (pkt.ip_src == port_scanner) then
+				puts "main block and dport is #{pkt.dport}"
 				# They have searched for the next sequential port
-				@@d_port = pkt.dport.to_i + 1
+				@@d_port = pkt.dport.to_i
 
 				@@port_scan_count += 1
 
 			#else
-			elsif (pkt.sport >= 5200) then
+			elsif (pkt.dport == 0) then
+				nil
+			else
+				puts "RESETTING AND dport is #{pkt.dport}"
 				#puts "RESET"*3
 				# Brand new scan
 				@@port_scanner = pkt.ip_src
 				@@d_port = pkt.dport
-				@@dd_port = pkt.dport
 				@@port_scan_count = 1
 			end
 
