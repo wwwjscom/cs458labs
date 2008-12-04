@@ -423,26 +423,14 @@ def monitor
 	end
 end
 
-def verbose
-	@@network.each_packet do |pkt|
-		puts "#{pkt.ip_src}:#{pkt.sport} #{pkt.ip_dst}:#{pkt.dport}"
-	end
-end
-
 def countdown
 	stop_time = Time.new.to_f + 10
 
-	thread = Thread.new{ while true do verbose end }
+	@@network.each_packet do |pkt|
+		puts "#{pkt.ip_src}:#{pkt.sport} #{pkt.ip_dst}:#{pkt.dport}"
 
-	while true do
-		if Time.new.to_f < stop_time then
-			nil
-		else
-			Thread.kill(thread)
-			break
-		end
+		break if Time.new.to_f > stop_time
 	end
-
 end
 
 def read_IDS
