@@ -13,12 +13,15 @@ tcp_filter = Pcap::Filter.new('tcp', @@network.capture)
 @@os_pinger = 0
 os_ping_time = 0
 
-port_scanner = 0
+@@port_scanner = 0
 @@d_port = 0
-port_scan_count = 0
+@@dd_port = 0
+@@port_scan_count = 0
 
 @run = true
 @@rulesArray = Array.new
+
+@@os_blocked = false
 
 def addRule
 
@@ -69,7 +72,7 @@ end
 def add_rule_to_array rule_hash
 	#if validRule?(rule_hash) then
 		@@rulesArray.push(rule_hash)
-		puts "Rule added!"
+		#puts "Rule added!"
 	#end
 end
 
@@ -330,42 +333,44 @@ def monitor
 			### Check for port scanning ###
 			###			    ###
 			
-			if (pkt.dport == (@@d_port + 1)) and (pkt.ip_src == port_scanner) then
+			if (pkt.dport == (@@d_port + 1)) and (pkt.ip_src == @@port_scanner) then
+			#if ((pkt.dport == (@@d_port + 1)) or (pkt.dport == (@@dd_port + 1))) and (pkt.ip_src == port_scanner) then
 				# They have searched for the next sequential port
-				@@d_port += 1
-				port_scan_count += 1
+				@@d_port = pkt.dport.to_i + 1
 
-				if port_scan_count >= 5 then
+				@@port_scan_count += 1
+
+			#else
+			elsif (pkt.sport >= 5200) then
+				#puts "RESET"*3
+				# Brand new scan
+				@@port_scanner = pkt.ip_src
+				@@d_port = pkt.dport
+				@@dd_port = pkt.dport
+				@@port_scan_count = 1
+			end
+
+				if @@port_scan_count >= 5 then
 					# Block them
 					writeLog(pkt.ip_src, "Port Scan")
 
 					# reset variables
-					port_scanner = 0
+					@@port_scanner = 0
 					@@d_port = 0
 					port_scan_count = 0
 				end
 
-				puts "Port Scanner: #{port_scanner}"
+
+
+
+				puts "Port Scanner: #{@@port_scanner}"
 				puts "Dest Port: #{@@d_port}"
-				puts "Port Scan Count: #{port_scan_count}"
-
-
-
-			end
-			#else
-		#	elsif (pkt.sport != 0) then
-		#		puts "RESET"*3
-		#		# Brand new scan
-		#		port_scanner = pkt.ip_src
-		#		@@d_port = pkt.dport
-		#		port_scan_count = 1
-		#	end
-
+				puts "Port Scan Count: #{@@port_scan_count}"
 			###			 ###
 			### Check for OS Pinging ###
 			###			 ###
 			
-			if (pkt.tcp_fin? or pkt.tcp_ack? or pkt.tcp_syn?) and (pkt.ip_src == @@os_pinger) then
+			if (pkt.tcp_fin? or pkt.tcp_ack? or pkt.tcp_syn?) and (pkt.ip_src == @@os_pinger) and @@os_blocked == false then
 				puts "OS Pinger"*5
 				@@os_pinger = pkt.ip_src
 				@@os_ping += 1
@@ -379,14 +384,14 @@ def monitor
 
 
 			else
-				puts "Setting OS Pinger"*5
+				#puts "Setting OS Pinger"*5
 				@@os_ping_time = Time.new
 				@@os_ping = 0
 				@@os_pinger = pkt.ip_src
 
 			end
 
-			if @@os_ping >= 5 and (Time.new - @@os_ping_time) < 20  then
+			if @@os_ping >= 5 and (Time.new - @@os_ping_time) < 20  and @@os_blocked == false then
 
 				puts "BLOCKED!!!!!"*50
 				writeLog(pkt.ip_src, "OS Fingerprinting")
@@ -409,14 +414,11 @@ def monitor
 				# Reset variables
 				@@os_ping = 0
 				@@os_pinger = 0
+
+				@@os_blocked = true
 			end
 
-			# Debug outputs
-			puts "OS Ping Time: #{@@os_ping_time}"
-			puts "OS Ping: #{@@os_ping}"
-			puts "OS Pinger: #{@@os_pinger}"
-
-
+		
 		#rescue
 		#	nil
 		#end
@@ -472,7 +474,6 @@ while @run
 	command = gets.to_i
 
 	case command
-		#when 1 then @@t = Thread.new{ monitor }
 		when 1 then monitor 
 		when 2 then Thread.kill(@@t)
 		when 3 then countdown
