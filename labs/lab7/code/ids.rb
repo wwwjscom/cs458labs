@@ -4,7 +4,8 @@ require 'pcaplet'
 require 'thread'
 
 
-@@network = Pcaplet.new('-n -i en1')
+#@@network = Pcaplet.new('-n -i en1')
+@@network = Pcaplet.new('-n -i lo0')
 
 tcp_filter = Pcap::Filter.new('tcp', @@network.capture)
 
@@ -66,10 +67,10 @@ def addRule
 end
 
 def add_rule_to_array rule_hash
-	if validRule?(rule_hash) then
-		@@rulesArray.push(h)
+	#if validRule?(rule_hash) then
+		@@rulesArray.push(rule_hash)
 		puts "Rule added!"
-	end
+	#end
 end
 
 def validRule? rule
@@ -153,8 +154,6 @@ def printRules
 
 	if @i == 1
 		puts "No rules to print!"
-	else
-		puts "Rules Loaded!"
 	end
 end
 
@@ -301,7 +300,9 @@ end
 def monitor
 	@@network.each_packet do |pkt|
 
-		begin
+		puts "#{pkt.ip_src}:#{pkt.sport} #{pkt.ip_dst}:#{pkt.dport}"
+
+		#begin
 			###			###
 			### Detect NOP Payloads ###
 			###			###
@@ -343,48 +344,82 @@ def monitor
 					@@d_port = 0
 					port_scan_count = 0
 				end
-			else
-				# Brand new scan
-				port_scanner = pkt.ip_src
-				@@d_port = pkt.dport
-				port_scan_count = 1
+
+				puts "Port Scanner: #{port_scanner}"
+				puts "Dest Port: #{@@d_port}"
+				puts "Port Scan Count: #{port_scan_count}"
+
+
+
 			end
-
-			puts "Port Scanner: #{port_scanner}"
-			puts "Dest Port: #{@@d_port}"
-			puts "Port Scan Count: #{port_scan_count}"
-
+			#else
+		#	elsif (pkt.sport != 0) then
+		#		puts "RESET"*3
+		#		# Brand new scan
+		#		port_scanner = pkt.ip_src
+		#		@@d_port = pkt.dport
+		#		port_scan_count = 1
+		#	end
 
 			###			 ###
 			### Check for OS Pinging ###
 			###			 ###
 			
 			if (pkt.tcp_fin? or pkt.tcp_ack? or pkt.tcp_syn?) and (pkt.ip_src == @@os_pinger) then
+				puts "OS Pinger"*5
 				@@os_pinger = pkt.ip_src
 				@@os_ping += 1
+
+
+				# Debug outputs
+				puts "OS Ping Time: #{@@os_ping_time}"
+				puts "OS Ping: #{@@os_ping}"
+				puts "OS Pinger: #{@@os_pinger}"
+
+
+
 			else
-				os_ping_time = Time.new
+				puts "Setting OS Pinger"*5
+				@@os_ping_time = Time.new
 				@@os_ping = 0
 				@@os_pinger = pkt.ip_src
+
 			end
 
-			if @@os_ping >= 5 and (Time.new - os_ping_time) < 20  then
+			if @@os_ping >= 5 and (Time.new - @@os_ping_time) < 20  then
+
+				puts "BLOCKED!!!!!"*50
 				writeLog(pkt.ip_src, "OS Fingerprinting")
-				
+
+				# block IP for OS pinging
+				h = Hash.new{}
+				h = 
+					{
+					"src_ip" => pkt.ip_src, 
+					"src_netmask" => "255.255.255.0",
+					"src_port" => pkt.sport,
+					"dest_ip" => pkt.dst,
+					"dest_netmask" => "255.255.255.0",
+					"dest_port" => pkt.dport,
+					"protocol" => "0",
+					"action" => "1"
+					}
+				add_rule_to_array(h)
+
+				# Reset variables
 				@@os_ping = 0
 				@@os_pinger = 0
-				# block IP for OS pinging
 			end
 
 			# Debug outputs
-			puts "OS Ping Time: #{os_ping_time}"
+			puts "OS Ping Time: #{@@os_ping_time}"
 			puts "OS Ping: #{@@os_ping}"
 			puts "OS Pinger: #{@@os_pinger}"
 
 
-		rescue
-			nil
-		end
+		#rescue
+		#	nil
+		#end
 	end
 end
 
@@ -414,20 +449,21 @@ def read_IDS
 
 	@i = 1
 
-	begin
-		File.open("./ids.txt").each do |line|
+	File.open("./ids.txt").each do |line|
 
+		if @i != 1 then
 			line = line.chop
 
 			line = line[( line.index(' ') + 1 )..-1]
 
-			puts "#{@i}-#{line}"
+			puts "#{@i-1}-#{line}"
 
-			@i = @i + 1
 		end
-	rescue
-		puts "No one is blocked at the moment"
+		@i = @i + 1
+
 	end
+
+	puts "No one is blocked at the moment" if @i == 1
 end
 
 
@@ -448,7 +484,8 @@ while @run
 	command = gets.to_i
 
 	case command
-		when 1 then @@t = Thread.new{ monitor }
+		#when 1 then @@t = Thread.new{ monitor }
+		when 1 then monitor 
 		when 2 then Thread.kill(@@t)
 		when 3 then countdown
 		when 4 then read_IDS
