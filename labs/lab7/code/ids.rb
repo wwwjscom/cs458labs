@@ -178,6 +178,28 @@ def writeFile
 	puts "Rules Saved!"
 end
 
+def updateLog delete_me
+
+	i = 1
+
+	tmp_array = Array.new
+
+	File.open('./ids.txt').each do |line|
+
+		tmp_array.push(line) if i != (delete_me + 1)
+		i += 1
+	end
+
+	outputFile = File.new('./ids.txt', 'w')
+
+	tmp_array.each do |line|
+
+		outputFile.puts "#{line}"
+	end
+
+	outputFile.close
+end
+
 def writeLog ip, reason
 
 	outputFile = File.new("./ids.txt", "a")
@@ -305,14 +327,14 @@ end
 def monitor
 	@@network.each_packet do |pkt|
 
-		puts "#{pkt.ip_src}:#{pkt.sport} #{pkt.ip_dst}:#{pkt.dport}"
-
-		#begin
+		begin
 			###			###
 			### Detect NOP Payloads ###
 			###			###
 
 			if pkt.tcp_data.to_s =~ /NOPNOPNOPNOPNOP/ and @@nop_blocked == false
+				puts "Buffer Overflow Detected...blocking"
+
 				writeLog(pkt.ip_src, "Buffer Overflow")
 				# Flag for NOP payload
 				h = Hash.new{}
@@ -341,6 +363,8 @@ def monitor
 				@@port_scan_count += 1
 
 				if @@port_scan_count >= 5 then
+					puts "Port Scanning Detected...blocking"
+
 					# Block them
 					writeLog(pkt.ip_src, "Port Scan")
 
@@ -359,8 +383,6 @@ def monitor
 					}
 					add_rule_to_array(h)
 
-					puts "BLOCKED!!!!!"*50
-
 					# reset variables
 					@@port_scanner = 0
 					@@d_port = 0
@@ -368,10 +390,6 @@ def monitor
 
 					@@port_blocked = true
 
-
-					#puts "Port Scanner: #{@@port_scanner}"
-					#puts "Dest Port: #{@@d_port}"
-					#puts "Port Scan Count: #{@@port_scan_count}"
 
 				end
 
@@ -383,22 +401,12 @@ def monitor
 			###			 ###
 			
 			elsif (pkt.tcp_fin? or pkt.tcp_ack? or pkt.tcp_syn?) and (pkt.ip_src == @@os_pinger) and @@os_blocked == false and @@os_ping < 5 then
-				puts "OS Pinger"*5
 				@@os_pinger = pkt.ip_src
 				@@os_ping += 1
 
-
-				# Debug outputs
-				puts "OS Ping Time: #{@@os_ping_time}"
-				puts "OS Ping: #{@@os_ping}"
-				puts "OS Pinger: #{@@os_pinger}"
-
-
-
-			#elsif @@os_ping >= 5 and (Time.new - @@os_ping_time) < 20  and @@os_blocked == false then
 			elsif @@os_ping >= 5 and (Time.new - @@os_ping_time) < 20  and @@os_blocked == false then
 
-				puts "BLOCKED!!!!!"*50
+				puts "OS Fingerprintin Detected...blocking"
 				writeLog(pkt.ip_src, "OS Fingerprinting")
 
 				# block IP for OS pinging
@@ -427,6 +435,7 @@ def monitor
 				@@os_ping_time = Time.new
 				@@os_ping = 0
 				@@os_pinger = pkt.ip_src
+
 				# Brand new scan
 				@@port_scanner = pkt.ip_src
 				@@d_port = pkt.dport
@@ -434,9 +443,9 @@ def monitor
 			end
 
 		
-		#rescue
-		#	nil
-		#end
+		rescue
+			nil
+		end
 	end
 end
 
@@ -494,6 +503,10 @@ while @run
 		when 3 then countdown
 		when 4 then read_IDS
 		when 5 then printRules
+		when 6 then
+			id = gets.to_i
+			@@rulesArray.delete_at((id - 1))
+			updateLog(id)
 		when 7 then
 			puts "Bye now!" 
 			@run = false 
