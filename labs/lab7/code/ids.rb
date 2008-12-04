@@ -22,6 +22,8 @@ os_ping_time = 0
 @@rulesArray = Array.new
 
 @@os_blocked = false
+@@port_blocked = false
+@@nop_blocked = false
 
 def addRule
 
@@ -310,7 +312,7 @@ def monitor
 			### Detect NOP Payloads ###
 			###			###
 
-			if pkt.tcp_data.to_s =~ /NOP/
+			if pkt.tcp_data.to_s =~ /NOPNOPNOPNOPNOP/ and @@nop_blocked == false
 				writeLog(pkt.ip_src, "Buffer Overflow")
 				# Flag for NOP payload
 				h = Hash.new{}
@@ -326,54 +328,61 @@ def monitor
 					"action" => "1"
 					}
 				add_rule_to_array(h)
-			end
 
+				@@nop_blocked = true
 
 			###			    ###
 			### Check for port scanning ###
 			###			    ###
-			
-			if (pkt.dport == (@@d_port + 1)) and (pkt.ip_src == @@port_scanner) and pkt.dport != 0 then
-			#if ((pkt.dport == (@@d_port + 1)) or (pkt.dport == (@@dd_port + 1))) and (pkt.ip_src == port_scanner) then
-				puts "main block and dport is #{pkt.dport}"
+			elsif (pkt.dport == (@@d_port + 1)) and (pkt.ip_src == @@port_scanner) and pkt.dport != 0 and @@port_blocked == false then
 				# They have searched for the next sequential port
 				@@d_port = pkt.dport.to_i
 
 				@@port_scan_count += 1
 
-			#else
-			elsif (pkt.dport == 0) then
-				nil
-			else
-				puts "RESETTING AND dport is #{pkt.dport}"
-				#puts "RESET"*3
-				# Brand new scan
-				@@port_scanner = pkt.ip_src
-				@@d_port = pkt.dport
-				@@port_scan_count = 1
-			end
-
 				if @@port_scan_count >= 5 then
 					# Block them
 					writeLog(pkt.ip_src, "Port Scan")
+
+					# Flag for port scanning
+					h = Hash.new{}
+					h = 
+						{
+					"src_ip" => pkt.ip_src, 
+					"src_netmask" => "255.255.255.0",
+					"src_port" => pkt.sport,
+					"dest_ip" => pkt.dst,
+					"dest_netmask" => "255.255.255.0",
+					"dest_port" => pkt.dport,
+					"protocol" => "0",
+					"action" => "1"
+					}
+					add_rule_to_array(h)
+
+					puts "BLOCKED!!!!!"*50
 
 					# reset variables
 					@@port_scanner = 0
 					@@d_port = 0
 					port_scan_count = 0
+
+					@@port_blocked = true
+
+
+					#puts "Port Scanner: #{@@port_scanner}"
+					#puts "Dest Port: #{@@d_port}"
+					#puts "Port Scan Count: #{@@port_scan_count}"
+
 				end
 
-
-
-
-				puts "Port Scanner: #{@@port_scanner}"
-				puts "Dest Port: #{@@d_port}"
-				puts "Port Scan Count: #{@@port_scan_count}"
+			elsif (pkt.dport == 0) then
+				nil
+			
 			###			 ###
 			### Check for OS Pinging ###
 			###			 ###
 			
-			if (pkt.tcp_fin? or pkt.tcp_ack? or pkt.tcp_syn?) and (pkt.ip_src == @@os_pinger) and @@os_blocked == false then
+			elsif (pkt.tcp_fin? or pkt.tcp_ack? or pkt.tcp_syn?) and (pkt.ip_src == @@os_pinger) and @@os_blocked == false and @@os_ping < 5 then
 				puts "OS Pinger"*5
 				@@os_pinger = pkt.ip_src
 				@@os_ping += 1
@@ -386,15 +395,8 @@ def monitor
 
 
 
-			else
-				#puts "Setting OS Pinger"*5
-				@@os_ping_time = Time.new
-				@@os_ping = 0
-				@@os_pinger = pkt.ip_src
-
-			end
-
-			if @@os_ping >= 5 and (Time.new - @@os_ping_time) < 20  and @@os_blocked == false then
+			#elsif @@os_ping >= 5 and (Time.new - @@os_ping_time) < 20  and @@os_blocked == false then
+			elsif @@os_ping >= 5 and (Time.new - @@os_ping_time) < 20  and @@os_blocked == false then
 
 				puts "BLOCKED!!!!!"*50
 				writeLog(pkt.ip_src, "OS Fingerprinting")
@@ -419,6 +421,16 @@ def monitor
 				@@os_pinger = 0
 
 				@@os_blocked = true
+			else
+
+				#puts "Setting OS Pinger"*5
+				@@os_ping_time = Time.new
+				@@os_ping = 0
+				@@os_pinger = pkt.ip_src
+				# Brand new scan
+				@@port_scanner = pkt.ip_src
+				@@d_port = pkt.dport
+				@@port_scan_count = 1
 			end
 
 		
@@ -456,7 +468,7 @@ def read_IDS
 
 	end
 
-	puts "No one is blocked at the moment" if @i == 1
+	puts "No one is blocked at the moment" if @i == 2
 end
 
 
